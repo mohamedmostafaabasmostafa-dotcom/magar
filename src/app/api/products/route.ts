@@ -4,12 +4,15 @@ import { getSupabase } from '@/lib/supabase';
 export async function GET() {
   try {
     const supabase = getSupabase();
-    const { data, error } = await supabase.from('products').select('*');
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .order('created_at', { ascending: false });
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json(Array.isArray(data) ? data : []);
-  } catch (e:any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+    return NextResponse.json(data ?? []);
+  } catch (e: any) {
+    return NextResponse.json({ error: e?.message || 'Server error' }, { status: 500 });
   }
 }
 
@@ -24,7 +27,7 @@ export async function POST(req: Request) {
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true });
-  } catch (e:any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+  } catch (e: any) {
+    return NextResponse.json({ error: e?.message || 'Server error' }, { status: 500 });
   }
 }
