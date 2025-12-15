@@ -1,4 +1,6 @@
-﻿export const dynamic = 'force-dynamic';
+﻿'use client';
+
+import { useEffect, useState } from 'react';
 
 type Product = {
   id: string;
@@ -7,32 +9,32 @@ type Product = {
   price: number;
 };
 
-async function getProducts(): Promise<Product[]> {
-  const res = await fetch('http://localhost:3000/api/products', { cache: 'no-store' });
-  return res.json();
-}
+export default function Home() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
-export default async function Home() {
-  const products = await getProducts();
+  useEffect(() => {
+    fetch('/api/products', { cache: 'no-store' })
+      .then(res => res.json())
+      .then(data => { setProducts(Array.isArray(data) ? data : []); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
 
   return (
-    <main className='min-h-screen flex items-center justify-center bg-gray-100 p-6'>
+    <main className='min-h-screen bg-gray-100 p-6 flex justify-center'>
       <div className='w-full max-w-xl space-y-4'>
         <h1 className='text-2xl font-bold'>المنتجات</h1>
 
-        {products.length === 0 ? (
-          <div className='bg-white p-6 rounded-xl shadow'>لا يوجد منتجات بعد</div>
+        {loading ? (
+          <div className='bg-white p-6 rounded shadow'>جاري التحميل...</div>
+        ) : products.length === 0 ? (
+          <div className='bg-white p-6 rounded shadow'>لا يوجد منتجات</div>
         ) : (
-          products.map((p) => (
-            <div key={p.id} className='bg-white p-6 rounded-xl shadow'>
-              <h2 className='text-xl font-bold mb-1'>{p.name}</h2>
-              {p.description ? (
-                <p className='text-gray-600 mb-3'>{p.description}</p>
-              ) : null}
-              <p className='font-bold mb-4'>السعر: {p.price} جنيه</p>
-              <button className='bg-black text-white px-4 py-2 rounded'>
-                أضف للسلة
-              </button>
+          products.map(p => (
+            <div key={p.id} className='bg-white p-6 rounded shadow'>
+              <h2 className='text-xl font-bold'>{p.name}</h2>
+              {p.description ? <p className='text-gray-600'>{p.description}</p> : null}
+              <p className='font-bold mt-2'>السعر: {p.price} جنيه</p>
             </div>
           ))
         )}
